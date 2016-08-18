@@ -21,6 +21,8 @@ Gem::Specification.new do |s|
 
   s.add_dependency 'curburger'
   s.add_dependency 'oj', '~> 2.11'
+  s.add_development_dependency 'rake', '~> 11.0 '
+  s.add_development_dependency 'bundler', '~> 1.11'
   s.add_development_dependency "test-unit"
   s.add_development_dependency "rspec", "~> 3.2"
   s.add_development_dependency "pry"
