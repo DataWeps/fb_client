@@ -20,7 +20,7 @@ class FbClient
           TOKEN_TYPES.include?(one_type)
       }
       tail << "type[]=#{TOKEN_TYPES[:default]}" if tail.empty?
-      response = request "#{$FB_TOKENS[:url]}/get?#{tail.join('&')}"
+      response = request "#{FB_TOKENS[:url]}/get?#{tail.join('&')}"
       return nil if !response || (response.kind_of?(Hash) &&
         response.include?(:error))
 
@@ -29,7 +29,7 @@ class FbClient
 
     # report non-working token
     def self.report_token token
-      request "#{$FB_TOKENS[:url]}/check?access_token=#{token}"
+      request "#{FB_TOKENS[:url]}/check?access_token=#{token}"
     end
 
     # report non-working token and obtain a new one using get_token
@@ -40,7 +40,7 @@ class FbClient
 
     def self.free_token?(type = :default)
       begin
-        response = request "#{$FB_TOKENS[:url]}/stats"
+        response = request "#{FB_TOKENS[:url]}/stats"
         return false unless response
         return false if response['working'].to_i <= 0
         return false if type == :default && response['preferred'].to_i > 0
@@ -56,7 +56,7 @@ class FbClient
 
     # initialize curburger client only once
     def self.ini_token
-      @@ua_token ||= Curburger.new(($FB_TOKENS[:ua] || {}).merge({
+      @@ua_token ||= Curburger.new((FB_TOKENS[:ua] || {}).merge({
         :ignore_kill  => true,
         :req_norecode => true,
       }))

@@ -104,7 +104,7 @@ class FbClient
     def self.ini_fetch_conf
       return true if defined?(@@conf)
       @@conf = FbClient::Fetch::FB
-      @@conf.merge!($FB || {})
+      @@conf.merge!(FB || {})
     end
 
     def self.request url

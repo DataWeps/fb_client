@@ -1,4 +1,4 @@
-$FB_TOKENS = {
+FB_TOKENS = {
   :url => 'http://fb-tokens.ataxo.wcli.cz',
   :ua  => {
     :http_auth => {
