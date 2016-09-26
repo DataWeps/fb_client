@@ -36,7 +36,7 @@ class FbClient
     }
 
     def self.fetch_without_token(url, return_error = false)
-      response = request("#{@@conf[:graph_api_url]}#{url}")
+      response = request("#{@conf[:graph_api_url]}#{url}")
 
       if response && response.include?(:error) && response.include?(:content)
         error = recognize_error response[:content]
@@ -58,21 +58,22 @@ class FbClient
       token, last_error, doc, attempt = nil, nil, nil, 0
       loop do
         attempt += 1
-        break if attempt > @@conf[:token_attempts]
+        break if attempt > @conf[:token_attempts]
         token = FbClient::Token.get_token(preferred)
 
-        if !token.nil? && token == @@conf[:preferred_no_token]
-          sleep @@conf[:sleep_preferred]
+        if !token.nil? && token == @conf[:preferred_no_token]
+          sleep @conf[:sleep_preferred]
           attempt -= 1
           next
         elsif !token.nil? && !token
-          sleep @@conf[:sleep_no_token]
+          sleep @conf[:sleep_no_token]
           next
         elsif token.nil?
           return nil
         end
 
-        response = request("#{@@conf[:graph_api_url]}#{url}" \
+        @conf[:graph_api_url] << '/' unless @conf[:graph_api_url].end_with?('/')
+        response = request("#{@conf[:graph_api_url]}#{url}" \
           "#{url.index('?') ? '&' : '?'}access_token=#{token}")
 
         if response && response.include?(:error) && response.include?(:content)
@@ -97,14 +98,14 @@ class FbClient
       false
     end
 
-    private
+  private
 
     include Request
 
     def self.ini_fetch_conf
-      return true if defined?(@@conf)
-      @@conf = FbClient::Fetch::FB
-      @@conf.merge!(FB || {})
+      return true if defined?(@conf)
+      @conf = FbClient::Fetch::FB
+      @conf.merge!(FB_CLIENT || {})
     end
 
     def self.request url
@@ -115,7 +116,7 @@ class FbClient
     # initialize curburger client only once
     def self.ini_fetch
       ini_fetch_conf
-      @@ua_fetch ||= Curburger.new(@@conf[:ua])
+      @@ua_fetch ||= Curburger.new(@conf[:ua])
       @@ua_fetch.reset
     end
 
@@ -123,20 +124,20 @@ class FbClient
       begin
         # limit error - too many items in one response
         if response.include?('error') && response['error'].include?('code')
-          if @@conf[:errors][:masked].include?(response['code'].to_i) ||
-            @@conf[:errors][:ua_reset].include?(response['error']['code'].to_i)
+          if @conf[:errors][:masked].include?(response['code'].to_i) ||
+            @conf[:errors][:ua_reset].include?(response['error']['code'].to_i)
             false
-         elsif @@conf[:errors][:disable].include?(response['error']['code'].to_i)
+         elsif @conf[:errors][:disable].include?(response['error']['code'].to_i)
             {:error => response['error']['code'].to_i}
-          elsif @@conf[:errors][:break].include?(response['error']['code'].to_i)
+          elsif @conf[:errors][:break].include?(response['error']['code'].to_i)
             {:error => response['error']['code']}
-          elsif @@conf[:errors][:different_id].include?(response['error']['code'].to_i)
+          elsif @conf[:errors][:different_id].include?(response['error']['code'].to_i)
             {
               :error  => response['error']['code'].to_i,
               :new_id => response['error']['message'] =~
                 /to page id (\d+)/i ? $1.to_i : nil
             }
-          elsif @@conf[:errors][:limit_code].include?(response['error']['code'].to_i)
+          elsif @conf[:errors][:limit_code].include?(response['error']['code'].to_i)
             {
               error: 'limit_error'
             }
@@ -144,7 +145,7 @@ class FbClient
         else
           message = response['error_msg'] || response['error']['message']
           limit_error = {:error => message}
-          @@conf[:errors][:limit].each { |error|
+          @conf[:errors][:limit].each { |error|
             limit_error[:error] = 'limit_error' if
               response['error']['message'].match(error)
           }
