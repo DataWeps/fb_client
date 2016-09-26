@@ -8,7 +8,7 @@ class FbClient
     protected
 
     FB = {
-      :graph_api_url      => "https://graph.facebook.com/v2.0/",
+      :graph_api_url      => "https://graph.facebook.com/v2.2/",
       :sleep_no_token     => 200,
       :sleep_preferred    => 15,
       :token_attempts     => 3,
