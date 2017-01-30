@@ -19,7 +19,7 @@ Gem::Specification.new do |s|
     'http://github.com'
   s.license       = 'MIT'
 
-  s.add_dependency 'curburger'
+  s.add_dependency 'typhoeus'
   s.add_dependency 'oj', '~> 2.11'
   s.add_development_dependency 'rake', '~> 11.0 '
   s.add_development_dependency 'bundler', '~> 1.11'

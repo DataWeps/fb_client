@@ -16,10 +16,11 @@ describe 'FbClient' do
   context 'basic info' do
     before :context do
       @url = 'vilaglatohirmagazin?metadata=1'
-      p FbClient.fetch(@url, [:high_priority], true)
+      @response = FbClient.fetch(@url, [:high_priority], true)
     end
 
     it 'should has use 2.3' do
+      expect(@response['id']).to eq('167654416661674')
     end
   end
 end

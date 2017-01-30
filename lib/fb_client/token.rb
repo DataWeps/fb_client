@@ -14,14 +14,14 @@ class FbClient
     }
 
     def self.get_token(type = :default)
-      tail     = []
-      [type].flatten.uniq.each { |one_type|
+      tail = []
+      [type].flatten.uniq.each do |one_type|
         tail << "type[]=#{TOKEN_TYPES[one_type]}" if
           TOKEN_TYPES.include?(one_type)
-      }
+      end
       tail << "type[]=#{TOKEN_TYPES[:default]}" if tail.empty?
-      response = request "#{FB_TOKENS[:url]}/get?#{tail.join('&')}"
-      return nil if !response || (response.kind_of?(Hash) &&
+      response = request("#{FB_TOKENS[:url]}/get?#{tail.join('&')}")
+      return nil if !response || (response.is_a?(Hash) &&
         response.include?(:error))
 
       response['token'] || response['error']
@@ -56,17 +56,14 @@ class FbClient
 
     # initialize curburger client only once
     def self.ini_token
-      @@ua_token ||= Curburger.new((FB_TOKENS[:ua] || {}).merge({
-        :ignore_kill  => true,
-        :req_norecode => true,
-      }))
-      @@ua_token.reset
+      return true if defined?(@token_conf)
+      @token_conf = FB_TOKENS[:ua][:connect]
     end
 
 
-    def self.request url
+    def self.request(url)
       ini_token
-      FbClient::Request.ua_get @@ua_token, url
+      FbClient::Request.ua_get(url, @token_conf)
     end
 
   end
