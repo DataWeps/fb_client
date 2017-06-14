@@ -1,5 +1,6 @@
 # encoding:utf-8
 require 'fb_client/request'
+require 'active_support/core_ext/hash/deep_merge'
 
 class FbClient
   module Fetch
@@ -33,10 +34,11 @@ class FbClient
         response = request("#{@conf[:graph_api_url]}#{url}")
 
         if response && response.include?(:error) && response.include?(:content)
-          error = recognize_error response[:content]
+          error = recognize_error(response[:content])
           # stop fetching
-          return return_error ? error : false if
-            error.is_a?(Hash) || error == true
+          if error.is_a?(Hash) || error == true
+            return return_error ? error : false
+          end
         end
 
         if response && response.is_a?(Hash) && response.include?('error')
@@ -83,7 +85,7 @@ class FbClient
           end
 
           if response && response.is_a?(Hash) && response.include?('error')
-            return_error ? { error: response['error']} : false
+            return_error ? { error: response['error'] } : false
           else
             return response
           end
@@ -95,7 +97,7 @@ class FbClient
       def ini_fetch_conf
         return true if defined?(@conf)
         @conf = FbClient::Fetch::FB.dup
-        @conf[:ua].merge!(FB_CLIENT || {})
+        @conf.deep_merge!(FB_CLIENT || {})
       end
 
       def request(url, params = {})
@@ -111,33 +113,29 @@ class FbClient
           if response.include?('error') && response['error'].include?('code')
             if @conf[:errors][:masked].include?(response['code'].to_i) ||
               @conf[:errors][:ua_reset].include?(response['error']['code'].to_i)
-              false
+              return false
            # elsif disable_page?(response['error'])
            #   { error: :disable }
             elsif @conf[:errors][:break].include?(response['error']['code'].to_i)
-              {:error => response['error']['code']}
+              return {:error => response['error']['code']}
             elsif @conf[:errors][:different_id].include?(response['error']['code'].to_i)
-              {
+              return {
                 :error  => response['error']['code'].to_i,
                 :new_id => response['error']['message'] =~
                   /to page id (\d+)/i ? $1.to_i : nil
               }
             elsif @conf[:errors][:limit_code].include?(response['error']['code'].to_i)
-              { error: 'limit_error' }
+              return { error: 'limit_error' }
             end
-          else
-            message = response['error_msg'] || response['error']['message']
-            limit_error = { error: message }
-            @conf[:errors][:limit].each do |error|
-              limit_error[:error] = 'limit_error' if
-                response['error']['message'].match(error)
-            end
-            limit_error
+          end
+
+          message = response['error_msg'] || response['error']['message']
+          @conf[:errors][:limit].each_with_object(error: message) do |error, mem|
+            mem[:error] = 'limit_error' if response['error']['message'].match(error)
           end
         rescue => bang
-          return {:error => "Facebook::Fetch: " +
-            "#{bang.message} #{bang.backtrace} #{response}"
-          }
+          { error: "Facebook::Fetch: " \
+                    "#{bang.message} #{bang.backtrace} #{response}" }
         end
       end
     end

@@ -20,6 +20,7 @@ Gem::Specification.new do |s|
   s.license       = 'MIT'
 
   s.add_dependency 'typhoeus'
+  s.add_dependency 'activesupport', '~> 4.2', '>= 4.2.8'
   s.add_dependency 'oj', '~> 2.11'
   s.add_development_dependency 'rake', '~> 11.0 '
   s.add_development_dependency 'bundler', '~> 1.11'
