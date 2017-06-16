@@ -20,12 +20,13 @@ class FbClient
         :ua_reset   => [5],
         :disable    => [100],
         :break      => [2500, 803, 21],
-        :masked     => [190, 613, 2, 4, 17, 613],
+        :masked     => [190, 613, 2, 4, 17, 613, 32],
         :limit_code => [-3, 1],
         :limit      => [
           /the '?limit'? parameter should not exceed/i,
+          /request limit reached/i,
           /an unknown error occurred/i,
-          /Please reduce the amount of data you're asking for, then retry your request/ ],
+          /Please reduce the amount of data you're asking for, then retry your request/],
         user_token: [/unsupported get request/i],
         :different_id => [21] } }.freeze
 
