@@ -1,8 +1,8 @@
 # encoding:utf-8
 require 'typhoeus'
 
-class FbClient
-  module Request
+module FbClient
+  class Request
     DEFAULT_PARAMS = {
       attempts: 2,
       retry_wait: 3 }.freeze

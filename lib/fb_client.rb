@@ -1,14 +1,14 @@
 # encoding:utf-8
 require 'oj'
+require 'active_support/core_ext/object/blank'
 
 # helper methods
 require 'fb_client/token'
 require 'fb_client/fetch'
 
-class FbClient
-  include Token
-  include Fetch
+module FbClient
   Oj.default_options = { :mode => :compat, :time_format => :ruby }
+
   class << self
     def free_token?
       Token.get_token
@@ -18,7 +18,7 @@ class FbClient
       Token.get_token(type)
     end
 
-    def report_token token
+    def report_token(token)
       Token.report_token(token)
     end
 

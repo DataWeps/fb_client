@@ -1,14 +1,14 @@
 # encoding:utf-8
 require 'fb_client/request'
 
-class FbClient
-  module Token
+module FbClient
+  class Token
     TOKEN_TYPES = {
       :default       => 'default',
       :preferred     => 'preferred',
       :high_priority => 'high_priority',
       :old_api       => 'old_api',
-      :user_token    => 'user_token' }
+      :user_token    => 'user_token' }.freeze
 
     class << self
       def get_token(type = :default)
@@ -47,8 +47,6 @@ class FbClient
       end
 
     private
-
-      include Request
 
       # initialize curburger client only once
       def ini_token
