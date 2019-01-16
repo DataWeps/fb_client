@@ -1,4 +1,3 @@
-# encoding:utf-8
 require 'fb_client/request'
 require 'fb_client/error_response'
 

@@ -8,11 +8,11 @@ module FbClient
         message: [/request limit reached/i] },
       break: [2500, 803, 21],
       new_id: [21],
-      disable: [100],
+      disable: [10],
       limit: {
-        code: [-3, 1],
+        code: [-3, 1, 100],
         message: [
-          /the '?limit'? parameter should not exceed/i,
+          /parameter should not exceed/i,
           /an unknown error occurred/i,
           /please reduce the amount of data/i] }
     }.freeze
@@ -47,6 +47,16 @@ module FbClient
 
     private
 
+      def disable_error(_message, code)
+        { error: 'disable_error', code: code }
+      end
+
+
+      def disable_error?(_message, code)
+        return true if ERRORS[:masked][:code].include?(code)
+        false
+      end
+
       def masked_error(_message, _code)
         { error: MASKED_STATUS }
       end
@@ -65,7 +75,7 @@ module FbClient
       end
 
       def new_id_error?(_message, code)
-        ERRORS[:different_id].include?(code)
+        ERRORS[:new_id].include?(code)
       end
 
       def new_id_error(message, code)
@@ -75,14 +85,14 @@ module FbClient
       end
 
       def limit_error?(message, code)
-        return true if ERRORS[:limit_code][:code].include?(code)
+        return true if ERRORS[:limit][:code].include?(code)
         ERRORS[:limit].each do |error|
           return true if message =~ error
         end
         false
       end
 
-      def limit_error
+      def limit_error(messeage, error)
         { error: 'limit_error' }
       end
     end
