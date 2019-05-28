@@ -20,6 +20,7 @@ module FbClient
 
     class << self
       def fetch_without_token(url, return_error = false)
+        ini_fetch_conf
         response = request("#{@conf[:graph_api_url]}#{url}")
 
         if response && response.include?(:error) && response.include?(:content)
