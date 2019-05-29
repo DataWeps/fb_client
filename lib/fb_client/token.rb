@@ -22,7 +22,8 @@ module FbClient
         return nil if !response || (response.is_a?(Hash) &&
           response.include?(:error))
 
-        response['token'] || response['error']
+        status = response['token'] ? :token : :error
+        { status: status, data: response['token'] || response['error'] }
       end
 
       # report non-working token
@@ -42,7 +43,7 @@ module FbClient
         return false if response['working'].to_i <= 0
         return false if type == :default && response['preferred'].to_i > 0
         true
-      rescue => _
+      rescue StandardError
         false
       end
 

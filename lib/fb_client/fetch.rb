@@ -23,16 +23,11 @@ module FbClient
         ini_fetch_conf
         response = request("#{@conf[:graph_api_url]}#{url}")
 
-        if response && response.include?(:error) && response.include?(:content)
-          error = recognize_error(response[:content])
-          # stop fetching
-          if error.is_a?(Hash) || error == true
+        if FbClient::ErrorResponse.error_response?(response)
+          error = FbClient::ErrorResponse.recognize_error(response)
+          if error
             return return_error ? error : false
           end
-        end
-
-        if response && response.is_a?(Hash) && response.include?('error')
-          return_error ? { error: response['error'] } : false
         end
         response
       end
@@ -50,11 +45,12 @@ module FbClient
           break if attempt > @conf[:ua][:attempts] || change_token.zero?
           token = FbClient::Token.get_token(preferred)
 
-          if token.present? && token == @conf[:preferred_no_token]
+          if token[:status] == :token && token[:data] == @conf[:preferred_no_token]
             sleep(@conf[:sleep_preferred])
             attempt -= 1
             next
-          elsif !token
+          # no token available
+          elsif token[:status] == :error
             sleep(@conf[:sleep_no_token])
             next
           elsif token.nil?
@@ -63,7 +59,7 @@ module FbClient
 
           @conf[:graph_api_url] << '/' unless @conf[:graph_api_url].end_with?('/')
           response = request("#{@conf[:graph_api_url]}#{url}" \
-            "#{url.index('?') ? '&' : '?'}access_token=#{token}")
+            "#{url.index('?') ? '&' : '?'}access_token=#{token[:data]}")
 
           if FbClient::ErrorResponse.error_response?(response)
             error = FbClient::ErrorResponse.recognize_error(response)

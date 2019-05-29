@@ -9,8 +9,7 @@ module FbClient
 
     def self.ua_get(url, connect_params, _ = {})
       response = Typhoeus.get(url, connect_params)
-      return { error: response.return_message, content: response.body } unless
-        response.success?
+      return { error: response.return_message, content: response.body } unless response.success?
 
       begin
         Oj.load(response.body)
